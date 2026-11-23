@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<!-- The page pane: the find bar, shown by Find, over the page. -->
+<panel xmlns="urn:gui-forms:form:1" id="page" classes="pane" dock="fill">
+  <panel id="page.find-bar" classes="find-bar" dock="top"
+      bounds="0 0 600 30" padding="3 6">
+    <flex-panel id="page.find-row" dock="fill"
+        style="align-items: center; column-gap: 6px">
+      <label id="page.find-label" text="Find:" bounds="0 0 32 22"/>
+      <text-box id="page.find-text" placeholder-text="Find in page"
+          accessible-name="Find in page" bounds="0 0 220 22"/>
+      <button id="page.find-previous" classes="find-button" text="Previous"
+          bounds="0 0 72 22"/>
+      <button id="page.find-next" classes="find-button" text="Next"
+          bounds="0 0 56 22"/>
+      <check-box id="page.match-case" text="Match case" bounds="0 0 96 22"/>
+      <label id="page.find-count" classes="find-count" bounds="0 0 120 22"
+          item-style="flex-grow: 1"/>
+      <button id="page.find-close" classes="find-close" text="&#x00D7;"
+          accessible-name="Close find" bounds="0 0 20 20"/>
+    </flex-panel>
+  </panel>
+  <reference-page id="page.view" accessible-name="Reference page" dock="fill"/>
+</panel>

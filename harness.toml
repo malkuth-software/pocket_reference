@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Pocket Reference's project file for template_harness (harness/project.py
+# reads it; harness.lock pins the harness). CI uses the harness's toolchain
+# scripts only: the Windows CLANG64 toolchain, the Linux packages and the
+# LLVM runtimes.
+schema = 1
+
+[project]
+name = "pocket_reference"
+repository = "malkuth-software/pocket_reference"
+# The product is the workspace root; GUI.Forms is checked out beside its
+# sources at ./gui_forms, as in GUI.Forms' own CI.
+source_dir = "."
+build_name = "pocket_reference"
+env_prefix = "POCKET_REFERENCE"
+
+[ci]
+artifact_prefix = "pocket-reference-"
+native_workflow = ".github/workflows/build.yml"
+native_job = "build"
+
+[toolchain]
+# GUI.Forms' published Windows CLANG64 toolchain.
+repository = "malkuth-software/gui_forms"
+asset_prefix = "gui-forms-toolchain-"
+
+[tests]
+name_prefixes = []
+
+# install_linux_ci_packages.sh <profile>. application: GUI.Forms from source
+# (its X11 host and CPU Skia, with gn) and the program.
+[linux_packages.application]
+packages = [
+    "cmake", "ninja-build", "ccache", "clang-22", "llvm-22", "generate-ninja", "pkg-config",
+    "libx11-dev", "libxext-dev", "libxrandr-dev", "libxcursor-dev", "libxfixes-dev", "libxi-dev",
+    "libatk1.0-dev", "libatk-bridge2.0-dev",
+]
+
+[build]
+configure_variables = []
+
+[cache_manifest]
+profile = "Pocket Reference Release against the pinned GUI.Forms source"
+
+[cache_manifest.native_options]
+build_type = "Release"
+cxx_standard = 20

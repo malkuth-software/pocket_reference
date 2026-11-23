@@ -1,0 +1,7 @@
+{
+  "format": "gui-forms-theme/1",
+  "name": "pocket-reference",
+  "version": "0.1.0",
+  "engine": ">=0.3",
+  "sheet": {"path": "pocket_reference.theme.css", "sha256": "f5c04361e4f7847b44eacb145c428529001ddd0e7c872d8bd7dfb67b4e28621b"}
+}

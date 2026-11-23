@@ -1,0 +1,6 @@
+{
+  "pin_note": "The one place the GUI.Forms pin is written. PIN_GUI_FORMS_CP37_MERGE is replaced with the GUI.Forms main commit that merges checkpoint cp37. Until then Pocket Reference is built against the frozen cp37 preview SDK (preview/gui_forms at 55efaf3be), and CI refuses to run.",
+  "repository": "malkuth-software/gui_forms",
+  "commit": "PIN_GUI_FORMS_CP37_MERGE",
+  "compiler": "22.1.8"
+}

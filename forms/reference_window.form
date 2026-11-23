@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<!-- Pocket Reference's window: the menus, the navigation bar (Back,
+     Forward, the address, Home, Find and the search field), the split that
+     holds the contents and the page, and the status bar. The panes are their
+     own forms (contents_pane.form, page_pane.form), put into the split's
+     panels by the browser (src/reference_browser.cpp). The look is the
+     pocket_reference theme package; behaviour is program code. -->
+<form xmlns="urn:gui-forms:form:1" id="reference.window"
+    text="Pocket Reference"
+    client-size="1180 748">
+
+  <panel id="reference.frame" classes="frame" dock="fill">
+    <menu-strip id="reference.menu" dock="top"/>
+    <panel id="reference.navbar" classes="navbar" dock="top"
+        bounds="0 0 1180 38" padding="4 6">
+      <flex-panel id="reference.nav" dock="fill"
+          style="align-items: center; column-gap: 4px">
+        <button id="reference.back" classes="nav-round"
+            accessible-name="Back" tool-tip-text="Back (Alt+Left)"
+            bounds="0 0 28 28"/>
+        <button id="reference.forward" classes="nav-round"
+            accessible-name="Forward" tool-tip-text="Forward (Alt+Right)"
+            bounds="0 0 28 28"/>
+        <breadcrumb-trail id="reference.address"
+            accessible-name="Address"
+            bounds="0 0 400 24" item-style="flex-grow: 1"/>
+        <button id="reference.home" classes="nav-tool" text="Home"
+            tool-tip-text="Home (Alt+Home)" bounds="0 0 68 26"/>
+        <button id="reference.find" classes="nav-tool" text="Find"
+            tool-tip-text="Find in page (Ctrl+F)" bounds="0 0 60 26"/>
+        <search-field id="reference.search"
+            placeholder-text="Search the reference"
+            accessible-name="Search the reference"
+            bounds="0 0 230 24"/>
+      </flex-panel>
+    </panel>
+    <status-strip id="reference.status" dock="bottom"/>
+    <split-container id="reference.split" classes="body" dock="fill" padding="4"/>
+  </panel>
+</form>

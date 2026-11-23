@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+name: Check out the pinned template_harness
+description: >-
+  Reads harness.lock and checks that template_harness commit out, detached, at
+  ./template_harness, then points HARNESS_PROJECT at harness.toml and
+  HARNESS_WORKSPACE at the workspace for the job's later steps.
+runs:
+  using: composite
+  steps:
+    - id: lock
+      shell: bash
+      run: |
+        repository=$(sed -n 's/^repository[[:space:]]*=[[:space:]]*"\([A-Za-z0-9_.-]*\/[A-Za-z0-9_.-]*\)".*$/\1/p' harness.lock)
+        commit=$(sed -n 's/^commit[[:space:]]*=[[:space:]]*"\([0-9a-f]\{40\}\)".*$/\1/p' harness.lock)
+        if [ -z "$repository" ] || [ -z "$commit" ]; then
+          echo "harness-checkout: harness.lock needs one repository line and one commit line" >&2
+          exit 1
+        fi
+        echo "repository=$repository" >> "$GITHUB_OUTPUT"
+        echo "commit=$commit" >> "$GITHUB_OUTPUT"
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ steps.lock.outputs.repository }}
+        ref: ${{ steps.lock.outputs.commit }}
+        path: template_harness
+        persist-credentials: false
+    - shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
+      run: |
+        echo "HARNESS_PROJECT=$WORKSPACE/harness.toml" >> "$GITHUB_ENV"
+        echo "HARNESS_WORKSPACE=$WORKSPACE" >> "$GITHUB_ENV"

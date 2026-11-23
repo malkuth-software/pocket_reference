@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<!-- The contents pane: its header, the filter and the contents tree. -->
+<panel xmlns="urn:gui-forms:form:1" id="contents" classes="pane" dock="fill">
+  <panel id="contents.header" classes="pane-header" dock="top"
+      bounds="0 0 290 22" padding="0 6">
+    <label id="contents.caption" classes="pane-caption" text="Contents"
+        dock="fill"/>
+  </panel>
+  <search-field id="contents.filter" classes="filter" dock="top"
+      placeholder-text="Filter the contents"
+      accessible-name="Filter the contents"
+      bounds="0 0 290 24"/>
+  <tree-view id="contents.tree" accessible-name="Contents" dock="fill"/>
+</panel>

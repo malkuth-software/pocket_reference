@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Every push to main and every pull request: the house-style check, then a
+# build of Pocket Reference with its pack on each host (build.yml).
+name: CI
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['*.md', 'docs/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  style:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/harness-checkout
+      - name: Check C++ house style
+        run: python3 -B template_harness/harness/check_house_style.py src tools pack_coder
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      package: false

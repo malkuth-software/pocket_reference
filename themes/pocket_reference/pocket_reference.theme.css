@@ -1,0 +1,253 @@
+/* SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 */
+/* Pocket Reference's look, over the windows-professional base: the
+   colours, rules and gradients of Pocket Reference's design mockup. The
+   page's own parts are ReferencePage's anatomy (src/reference_page.hpp). */
+
+:root {
+  color-roles: page-ink from ink-on-paper, page-muted-ink from muted-ink-on-paper, page-link from command-link-ink-on-paper, syntax-keyword from ink-on-paper, syntax-type from ink-on-paper, syntax-function from ink-on-paper, syntax-string from ink-on-paper, syntax-number from ink-on-paper, syntax-comment from muted-ink-on-paper, syntax-directive from ink-on-paper, well-line from dark-line, panel-line from ordinary-line, rule-line from ordinary-line, card-line from ordinary-line, button-line from dark-line, round-line from selection-line, round-hot-line from selection-line, round-off-line from ordinary-line, hover-line from selection-line, selected-line from selection-line, button-hot-line from selection-line, gold-line from dark-line, find-line from dark-line;
+  page-ink: #1f1f1d on #ffffff;
+  page-muted-ink: #3c3c3a on #ffffff;
+  page-link: #1f4f8f on #ffffff;
+  syntax-keyword: #6a2c91 on #ffffff;
+  syntax-type: #19528b on #ffffff;
+  syntax-function: #7a4b00 on #ffffff;
+  syntax-string: #8a3b12 on #ffffff;
+  syntax-number: #0b5d73 on #ffffff;
+  syntax-comment: #5c6b77 on #ffffff;
+  syntax-directive: #1d5e2f on #ffffff;
+  well-line: #696967;
+  panel-line: #b4b4b2;
+  rule-line: #dcdcda;
+  card-line: #c9c9c7;
+  button-line: #676765;
+  round-line: #5d7fa8;
+  round-hot-line: #2a5f9f;
+  round-off-line: #b5b5b3;
+  hover-line: #3f7fc4;
+  selected-line: #336fb3;
+  button-hot-line: #3a78c2;
+  gold-line: #a0681a;
+  find-line: #9a6316;
+}
+
+/* The frame and the body behind the panes. */
+panel.frame::part(face), panel.pane::part(face), split-container::part(face) {
+  background: #f5f5f3;
+  border: none;
+}
+split-container::part(seam) {
+  background: #f5f5f3;
+}
+
+/* The menu bar: flat stock. */
+menu-strip::part(face) {
+  background: #f5f5f3;
+  border: none;
+  box-shadow: none;
+}
+
+/* The navigation bar (IE7): a light gradient with a white top line and a
+   grey foot line. */
+panel.navbar::part(face) {
+  background: linear-gradient(to bottom, #fbfbfa, #ececea);
+  border: none;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 #b4b4b2;
+}
+
+/* Back and Forward: round glossy blue buttons. */
+button.nav-round::part(face) {
+  background: linear-gradient(to bottom, #ffffff, #dce8f5 50%, #c3d6ec 51%, #d9e6f4);
+  border: 1px solid role(round-line);
+  border-radius: 14px;
+  box-shadow: 0 1px 1px #2a2a2833;
+}
+button.nav-round::part(face):hover {
+  background: linear-gradient(to bottom, #fbfdff, #d5e7f9 50%, #b8d3f0 51%, #c5dcf5);
+  border-color: role(round-hot-line);
+}
+button.nav-round:disabled::part(face) {
+  background: linear-gradient(to bottom, #fafaf9, #ececea);
+  border-color: role(round-off-line);
+  box-shadow: none;
+}
+
+/* Home and Find: clear tool buttons, gold while hot. */
+button.nav-tool::part(face) {
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  box-shadow: none;
+}
+button.nav-tool::part(face):hover {
+  background: linear-gradient(to bottom, #fff6d6, #ffe5a3 45%, #ffd57a 46%, #ffe7a6);
+  border-color: role(gold-line);
+}
+
+/* The address and the search fields: white wells with a dark frame and
+   an inner shadow. */
+breadcrumb-trail::part(face) {
+  background: #ffffff;
+  border: 1px solid role(well-line);
+  border-radius: 0;
+  box-shadow: inset 0 1px 2px #2a2a2833;
+}
+breadcrumb-trail::part(segment):hover {
+  background: linear-gradient(to bottom, #f0f7fe, #dfedfc);
+  border: 1px solid role(hover-line);
+  border-radius: 2px;
+}
+search-field::part(content) {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+search-field::part(well), text-box::part(well) {
+  background: #ffffff;
+  border: 1px solid role(well-line);
+  border-radius: 0;
+  box-shadow: inset 0 1px 2px #2a2a2833;
+}
+
+/* The contents pane: a header strip, the filter, the tree on white. */
+panel.pane-header::part(face) {
+  background: linear-gradient(to bottom, #fbfbfa, #e8e8e6);
+  border: 1px solid role(panel-line);
+}
+label.pane-caption {
+  font-weight: 600;
+}
+tree-view::part(face) {
+  background: #ffffff;
+  border: 1px solid role(well-line);
+}
+tree-view::part(row):hover {
+  background: linear-gradient(to bottom, #f0f7fe, #dfedfc);
+  border: 1px solid role(hover-line);
+}
+tree-view::part(row):state(selected) {
+  background: linear-gradient(to bottom, #dbeafa, #c7def7);
+  border: 1px solid role(selected-line);
+}
+
+/* The find bar. */
+panel.find-bar::part(face) {
+  background: linear-gradient(to bottom, #fbfbfa, #ececea);
+  border: 1px solid role(panel-line);
+}
+button.find-button::part(face) {
+  background: linear-gradient(to bottom, #ffffff, #f6f6f4 46%, #ececea 54%, #e2e2e0);
+  border: 1px solid role(button-line);
+  border-radius: 3px;
+  box-shadow: 0 1px 1px #2a2a2833;
+}
+button.find-button::part(face):hover {
+  background: linear-gradient(to bottom, #f4f9ff, #d5e6f9);
+  border-color: role(button-hot-line);
+}
+button.find-close::part(face) {
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  box-shadow: none;
+}
+button.find-close::part(face):hover {
+  background: linear-gradient(to bottom, #fff6d6, #ffe5a3 45%, #ffd57a 46%, #ffe7a6);
+  border-color: role(gold-line);
+}
+label.find-count {
+  color: role(page-muted-ink);
+}
+
+/* The status bar: flat stock under a grey line. */
+status-strip::part(face) {
+  background: #f5f5f3;
+  border: none;
+  box-shadow: inset 0 1px 0 #b4b4b2;
+}
+
+/* The page: paper in a dark frame. */
+reference-page {
+  font-family: Selawik, content;
+  font-size: 13px;
+}
+reference-page::part(paper) {
+  background: #ffffff;
+  border: 1px solid role(well-line);
+  border-radius: 0;
+}
+reference-page::part(text), reference-page::part(heading), reference-page::part(code-text) {
+  color: role(page-ink);
+}
+reference-page::part(heading-rule) {
+  background: #c9c9c7;
+}
+reference-page::part(section-rule) {
+  background: #e3e3e1;
+}
+reference-page::part(code-span) {
+  background: #f2f4f6;
+  border: none;
+  border-radius: 2px;
+}
+reference-page::part(link) {
+  color: role(page-link);
+}
+reference-page::part(signature) {
+  background: #f4f7fa;
+  border: none;
+  border-radius: 0;
+}
+reference-page::part(signature-bar) {
+  background: #2f6db6;
+  border: none;
+  border-radius: 0;
+}
+reference-page::part(code-block) {
+  background: #fbfbfa;
+  border: 1px solid role(rule-line);
+  border-radius: 0;
+}
+reference-page::part(keyword) { color: role(syntax-keyword); }
+reference-page::part(type) { color: role(syntax-type); }
+reference-page::part(function) { color: role(syntax-function); }
+reference-page::part(string) { color: role(syntax-string); }
+reference-page::part(number) { color: role(syntax-number); }
+reference-page::part(comment) { color: role(syntax-comment); }
+reference-page::part(directive) { color: role(syntax-directive); }
+reference-page::part(table-header) {
+  background: #f0f0ee;
+  border: 1px solid role(rule-line);
+  border-radius: 0;
+}
+reference-page::part(table-cell) {
+  background: #ffffff;
+  border: 1px solid role(rule-line);
+  border-radius: 0;
+}
+reference-page::part(find-match) {
+  background: #fbeeb8;
+  border: none;
+  border-radius: 0;
+}
+reference-page::part(find-current) {
+  background: #f4cf5a;
+  border: 1px solid role(find-line);
+  border-radius: 0;
+}
+reference-page::part(preview) {
+  background: #f7f7f5;
+  border: 1px solid role(rule-line);
+  border-radius: 0;
+}
+reference-page::part(caption), reference-page::part(purpose) {
+  color: role(page-muted-ink);
+}
+reference-page::part(card) {
+  background: #fcfcfb;
+  border: 1px solid role(card-line);
+  border-radius: 3px;
+}
+reference-page::part(card):hover {
+  background: linear-gradient(to bottom, #f0f7fe, #dfedfc);
+  border-color: role(hover-line);
+}

@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+name: Check out the pinned GUI.Forms
+description: >-
+  Reads third_party/gui-forms.lock.json, the one place the GUI.Forms pin is
+  written, and checks that commit out, detached, at ./gui_forms. A lock that
+  pins no commit yet fails here.
+outputs:
+  commit:
+    description: The locked commit.
+    value: ${{ steps.lock.outputs.commit }}
+runs:
+  using: composite
+  steps:
+    - id: lock
+      shell: bash
+      run: |
+        py=python3; command -v python3 >/dev/null || py=python
+        $py - <<'PY'
+        import json, os, re, sys
+        lock = json.load(open("third_party/gui-forms.lock.json", encoding="utf-8"))
+        if not re.fullmatch(r"[0-9a-f]{40}", lock["commit"]):
+            sys.exit("gui-forms-checkout: third_party/gui-forms.lock.json pins no commit yet (" + lock["commit"] + ")")
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+            out.write("repository=" + lock["repository"] + "\ncommit=" + lock["commit"] + "\n")
+        PY
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ steps.lock.outputs.repository }}
+        ref: ${{ steps.lock.outputs.commit }}
+        path: gui_forms
+        persist-credentials: false

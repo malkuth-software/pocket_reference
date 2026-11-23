@@ -1,0 +1,7 @@
+/.build/
+/build*/
+/dist/
+/gui_forms/
+/template_harness/
+/.ccache/
+__pycache__/

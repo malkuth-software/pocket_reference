@@ -1,0 +1,161 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Builds Pocket Reference on Windows, macOS and Linux against the pinned
+# GUI.Forms source (third_party/gui-forms.lock.json), with its pack: the
+# page text from GUI.Forms' docs and the figures rendered from its stock
+# specimens. With `package`, each host's download is uploaded as the
+# artifact pocket-reference-<platform>. ci.yml and release.yml call it.
+name: Build
+on:
+  workflow_call:
+    inputs:
+      package:
+        type: boolean
+        default: false
+      version:
+        type: string
+        default: ''
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2022
+            platform: windows-x64
+            shell: 'msys2 {0}'
+          - runner: macos-15
+            platform: macos-arm64
+            shell: bash
+          - runner: ubuntu-24.04
+            platform: linux-x64
+            shell: bash
+          - runner: ubuntu-24.04-arm
+            platform: linux-arm64
+            shell: bash
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    env:
+      BUILD_DIR: .build/${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/harness-checkout
+      - uses: ./.github/actions/gui-forms-checkout
+      - uses: actions/setup-python@v5
+        if: runner.os == 'Windows'
+        with:
+          python-version: '3.14'
+      - name: Restore GUI.Forms' Windows toolchain
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python template_harness/harness/windows_toolchain.py restore
+      - name: Select the Windows compiler
+        if: runner.os == 'Windows'
+        run: |
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+      - name: Install the macOS LLVM 22 compiler
+        if: runner.os == 'macOS'
+        run: |
+          brew install ninja llvm@22 ccache
+          echo "$(brew --prefix llvm@22)/bin" >> "$GITHUB_PATH"
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+          echo "OBJCXX=clang++" >> "$GITHUB_ENV"
+          echo "GUI_FORMS_LLVM_RUNTIME=$PWD/.build/toolchain/llvm-22.1.8-macos14" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        if: runner.os == 'macOS'
+        with:
+          path: .build/toolchain/llvm-22.1.8-macos14
+          key: macos-llvm-runtime-v1-${{ hashFiles('template_harness/harness/build_macos_runtimes.py', 'template_harness/harness/macos_runtime_manifest.py') }}
+      - name: Build the macOS 14 LLVM runtime
+        if: runner.os == 'macOS'
+        run: |
+          if [ ! -f "$GUI_FORMS_LLVM_RUNTIME/runtime-manifest.json" ]; then
+            python3 template_harness/harness/build_macos_runtimes.py --work "$RUNNER_TEMP/llvm-runtimes" --prefix "$GUI_FORMS_LLVM_RUNTIME" --jobs 4
+          fi
+          python3 template_harness/harness/macos_runtime_manifest.py "$GUI_FORMS_LLVM_RUNTIME"
+      - name: Install the Linux compiler and desktop libraries
+        if: runner.os == 'Linux'
+        run: |
+          sh template_harness/harness/install_linux_ci_packages.sh application "$RUNNER_TEMP/apt-archives"
+          sudo apt-get install -y --no-install-recommends libc++-22-dev libc++abi-22-dev libunwind-22-dev
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+      - name: Select the Linux LLVM runtime
+        id: linux-runtime
+        if: runner.os == 'Linux'
+        run: |
+          directory="$(python3 template_harness/harness/linux_runtime_manifest.py --directory-name)"
+          echo "GUI_FORMS_LLVM_RUNTIME=$PWD/.build/toolchain/$directory" >> "$GITHUB_ENV"
+          echo "directory=$directory" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        if: runner.os == 'Linux'
+        with:
+          path: .build/toolchain/${{ steps.linux-runtime.outputs.directory }}
+          key: linux-llvm-runtime-v1-${{ steps.linux-runtime.outputs.directory }}-${{ hashFiles('template_harness/harness/build_linux_runtimes.py', 'template_harness/harness/linux_runtime_manifest.py') }}
+      - name: Build the static Linux LLVM runtime
+        if: runner.os == 'Linux'
+        run: |
+          if [ ! -f "$GUI_FORMS_LLVM_RUNTIME/runtime-manifest.json" ]; then
+            python3 template_harness/harness/build_linux_runtimes.py --work "$RUNNER_TEMP/llvm-runtimes" --prefix "$GUI_FORMS_LLVM_RUNTIME" --jobs 4
+          fi
+          python3 template_harness/harness/linux_runtime_manifest.py "$GUI_FORMS_LLVM_RUNTIME"
+      - name: Verify the compiler
+        run: |
+          py=python3; command -v python3 >/dev/null || py=python
+          $py template_harness/harness/compiler_identity.py
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: objects-llvm22-v1-${{ matrix.platform }}-${{ hashFiles('third_party/gui-forms.lock.json', 'CMakeLists.txt', 'src/**', 'tools/**', 'pack_coder/**') }}
+          restore-keys: objects-llvm22-v1-${{ matrix.platform }}-
+      - name: Configure the compiler cache
+        run: |
+          cache_dir="$PWD/.ccache"
+          if command -v cygpath >/dev/null; then cache_dir="$(cygpath -m "$cache_dir")"; fi
+          cache_base="$PWD"
+          if command -v cygpath >/dev/null; then cache_base="$(cygpath -m "$cache_base")"; fi
+          echo "CCACHE_DIR=$cache_dir" >> "$GITHUB_ENV"
+          echo "CCACHE_BASEDIR=$cache_base" >> "$GITHUB_ENV"
+          echo "CCACHE_COMPILERCHECK=content" >> "$GITHUB_ENV"
+          CCACHE_DIR="$cache_dir" ccache --max-size=900M
+      - name: Configure
+        run: |
+          cmake -S . -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_TOOLCHAIN_FILE="$PWD/gui_forms/cmake/llvm22.cmake" \
+            -DPOCKET_REFERENCE_TOOLKIT_SOURCE_DIR="$PWD/gui_forms"
+      - name: Build Pocket Reference and its pack
+        run: cmake --build "$BUILD_DIR" --target pocket-reference --parallel 4
+      - name: Report the compiler cache
+        if: always()
+        run: ccache --show-stats
+      - name: Install GUI.Forms into an SDK prefix for its notices
+        if: inputs.package
+        run: |
+          cmake --build "$BUILD_DIR" --target toolkit/all --parallel 4
+          cmake --install "$BUILD_DIR"/toolkit --prefix "$RUNNER_TEMP/gui-forms-sdk"
+      - name: Package
+        if: inputs.package
+        run: |
+          py=python3; command -v python3 >/dev/null || py=python
+          version="${{ inputs.version }}"
+          $py tools/package.py --build "$BUILD_DIR" --toolkit "$RUNNER_TEMP/gui-forms-sdk" \
+            ${GUI_FORMS_LLVM_RUNTIME:+--runtime "$GUI_FORMS_LLVM_RUNTIME"} ${version:+--version "$version"}
+      - uses: actions/upload-artifact@v4
+        if: inputs.package
+        with:
+          name: pocket-reference-${{ matrix.platform }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          compression-level: 0
+          if-no-files-found: error
