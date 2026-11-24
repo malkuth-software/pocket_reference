@@ -66,6 +66,11 @@ if(APPLE)
     BUILD_WITH_INSTALL_RPATH TRUE)
 else()
   add_executable(pocket-reference WIN32 ${pocket_reference_sources})
+  # x86_64-pc-windows-msvc: a WIN32 program that defines main enters at
+  # mainCRTStartup (the startup's WinMainCRTStartup calls WinMain).
+  if(MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    target_link_options(pocket-reference PRIVATE "LINKER:/ENTRY:mainCRTStartup")
+  endif()
 endif()
 set_target_properties(pocket-reference PROPERTIES OUTPUT_NAME PocketReference)
 target_link_libraries(pocket-reference PRIVATE GUIForms::Application stxlib::algorithms pocket_reference_coder)
