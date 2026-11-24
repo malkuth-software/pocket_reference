@@ -74,6 +74,9 @@ else()
 endif()
 set_target_properties(pocket-reference PROPERTIES OUTPUT_NAME PocketReference)
 target_link_libraries(pocket-reference PRIVATE GUIForms::Application stxlib::algorithms pocket_reference_coder)
+# All the program's C++ allocations come from STXlib's allocator, as in
+# GUI.Forms' own programs; a sanitizer build keeps the toolchain's operator new.
+gui_forms_use_library_allocator(pocket-reference)
 
 # The forms: the window, and the two panes the browser puts in its split.
 # The page pane names the application's own control, ReferencePage.
