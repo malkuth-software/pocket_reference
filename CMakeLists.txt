@@ -9,10 +9,6 @@ project(PocketReference VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(MINGW)
-  # Ship only system DLLs' imports, as GUI.Forms does for its own programs.
-  add_link_options(-static)
-endif()
 
 # GUI.Forms, as Plan Paint takes it: the pinned source
 # (third_party/gui-forms.lock.json, scripts/fetch-gui-forms.py) built in
@@ -70,6 +66,11 @@ if(APPLE)
     BUILD_WITH_INSTALL_RPATH TRUE)
 else()
   add_executable(pocket-reference WIN32 ${pocket_reference_sources})
+  # x86_64-pc-windows-msvc: a WIN32 program that defines main enters at
+  # mainCRTStartup (the startup's WinMainCRTStartup calls WinMain).
+  if(MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    target_link_options(pocket-reference PRIVATE "LINKER:/ENTRY:mainCRTStartup")
+  endif()
 endif()
 set_target_properties(pocket-reference PROPERTIES OUTPUT_NAME PocketReference)
 target_link_libraries(pocket-reference PRIVATE GUIForms::Application stxlib::algorithms pocket_reference_coder)

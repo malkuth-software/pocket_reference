@@ -1,0 +1,3 @@
+# Text files are LF in every checkout, whatever the machine's core.autocrlf,
+# so hashes over file bytes (theme.json's sheet digest) agree between hosts.
+* text=auto eol=lf

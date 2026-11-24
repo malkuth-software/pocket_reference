@@ -108,9 +108,32 @@ jobs:
           fi
           python3 template_harness/harness/linux_runtime_manifest.py "$GUI_FORMS_LLVM_RUNTIME"
       - name: Verify the compiler
+        id: compiler
         run: |
           py=python3; command -v python3 >/dev/null || py=python
           $py template_harness/harness/compiler_identity.py
+      # Windows builds x86_64-pc-windows-msvc on STXlib's own runtime, as
+      # GUI.Forms 1.0 does (no MinGW runtime, Visual C++ tools or Windows
+      # SDK): the CLANG64 package gives only clang, lld and the shell, and
+      # GUI.Forms' tools/own_runtime.py builds static libc++ 22.1.8 and
+      # STXlib's C and Windows runtime from the STXlib commit its stx pin
+      # names, and sets the toolchain's three locations in the environment.
+      # Cached per pin and recipe, with the same key GUI.Forms' CI uses.
+      - uses: actions/cache/restore@v4
+        id: own-runtime
+        if: runner.os == 'Windows'
+        with:
+          path: .ci/own-runtime
+          key: gui-own-runtime-v1-${{ steps.compiler.outputs.identity }}-${{ hashFiles('gui_forms/stx.lock', 'gui_forms/tools/own_runtime.py', 'gui_forms/cmake/llvm22-windows-msvc.cmake', 'gui_forms/cmake/llvm22-windows-msvc-own.cmake') }}
+      - name: Build STXlib's own runtime and libc++ for the Windows target
+        id: own-runtime-build
+        if: runner.os == 'Windows'
+        run: python gui_forms/tools/own_runtime.py build --out .ci/own-runtime --jobs 4 --github-env
+      - uses: actions/cache/save@v4
+        if: steps.own-runtime-build.outcome == 'success' && steps.own-runtime.outputs.cache-hit != 'true'
+        with:
+          path: .ci/own-runtime
+          key: ${{ steps.own-runtime.outputs.cache-primary-key }}
       - uses: actions/cache@v4
         with:
           path: .ccache
@@ -126,15 +149,30 @@ jobs:
           echo "CCACHE_BASEDIR=$cache_base" >> "$GITHUB_ENV"
           echo "CCACHE_COMPILERCHECK=content" >> "$GITHUB_ENV"
           CCACHE_DIR="$cache_dir" ccache --max-size=900M
+      # GUI.Forms' toolchain for this host (tools/toolkit_configure.py
+      # toolchain): llvm22.cmake on macOS and Linux; on Windows the
+      # own-runtime toolchain with the locations the step above set, and a
+      # link map beside every image for the evidence step below.
       - name: Configure
         run: |
+          if [ "$RUNNER_OS" = Windows ]; then
+            toolchain="$(python gui_forms/tools/toolkit_configure.py toolchain)"
+          else
+            toolchain="-DCMAKE_TOOLCHAIN_FILE=$PWD/gui_forms/cmake/llvm22.cmake"
+          fi
           cmake -S . -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_OBJCXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_TOOLCHAIN_FILE="$PWD/gui_forms/cmake/llvm22.cmake" \
+            $toolchain \
             -DPOCKET_REFERENCE_TOOLKIT_SOURCE_DIR="$PWD/gui_forms"
       - name: Build Pocket Reference and its pack
         run: cmake --build "$BUILD_DIR" --target pocket-reference --parallel 4
+      # The build read only the own runtime: its #include search list, every
+      # link command and link map, and every program's and DLL's imports
+      # (Windows system DLLs and ucrtbase only).
+      - name: Prove the Windows build read only the own runtime
+        if: runner.os == 'Windows'
+        run: python gui_forms/tools/own_runtime.py evidence --build "$BUILD_DIR" --dlls "$BUILD_DIR"
       - name: Report the compiler cache
         if: always()
         run: ccache --show-stats
