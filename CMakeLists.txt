@@ -30,7 +30,7 @@ if(POCKET_REFERENCE_TOOLKIT_SOURCE_DIR)
 else()
   # Keep the selected SDK ahead of ambient headers from another SDK.
   set(CMAKE_NO_SYSTEM_FROM_IMPORTED ON)
-  find_package(GUIForms 0.6 CONFIG REQUIRED COMPONENTS Application)
+  find_package(GUIForms 1.0 CONFIG REQUIRED COMPONENTS Application)
   set_property(TARGET GUIForms::Application PROPERTY IMPORTED_NO_SYSTEM TRUE)
   set(pocket_reference_default_docs "")
 endif()
