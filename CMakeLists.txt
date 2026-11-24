@@ -9,10 +9,6 @@ project(PocketReference VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(MINGW)
-  # Ship only system DLLs' imports, as GUI.Forms does for its own programs.
-  add_link_options(-static)
-endif()
 
 # GUI.Forms, as Plan Paint takes it: the pinned source
 # (third_party/gui-forms.lock.json, scripts/fetch-gui-forms.py) built in
