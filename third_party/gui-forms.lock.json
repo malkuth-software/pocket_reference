@@ -1,6 +1,6 @@
 {
   "pin_note": "The one place the GUI.Forms pin is written: a GUI.Forms main commit (1.0 builds Windows on STXlib's own runtime, x86_64-pc-windows-msvc).",
   "repository": "malkuth-software/gui_forms",
-  "commit": "56884a723639e51dfc2a7225a70f2f0d4e0f8a2e",
+  "commit": "8b920c0f291b60dfdfd7819d912baf2c90683a3c",
   "compiler": "22.1.8"
 }
