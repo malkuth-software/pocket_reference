@@ -740,7 +740,7 @@ void ReferencePage::handle_mouse(gf::MouseEventArgs &arguments) {
     scroll_pointer(arguments);
     if (arguments.handled)
         return;
-    const gf::Point local = arguments.window_position;
+    const gf::Point local = arguments.location;
     const std::size_t link = link_at(local);
     if (arguments.action == gf::PointerAction::move) {
         if (link != hovered_link_) {
